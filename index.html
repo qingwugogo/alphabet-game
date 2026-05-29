@@ -664,11 +664,12 @@
 
         const letters = Object.keys(alphabetData);
         let currentIndex = 0;
+        const visitedLetters = new Set();
 
         // 初始化
         function init() {
             createAlphabetNav();
-            showLetter();
+            showLetter(false);
         }
 
         // 键盘布局字母顺序
@@ -702,14 +703,17 @@
         // 选择字母
         function selectLetter(index) {
             currentIndex = index;
-            showLetter();
+            const letter = letters[index];
+            visitedLetters.add(letter);
+            showLetter(true);
         }
         
         // 按字母选择（用于键盘点击）
         function selectLetterByLetter(letter) {
             const index = letters.indexOf(letter);
             currentIndex = index;
-            showLetter();
+            visitedLetters.add(letter);
+            showLetter(true);
             
             // 播放字母发音
             speak(letter);
@@ -725,7 +729,7 @@
         }
 
         // 显示字母
-        function showLetter() {
+        function showLetter(updateProgress = true) {
             const letter = letters[currentIndex];
             const data = alphabetData[letter];
 
@@ -739,10 +743,13 @@
                 btn.classList.toggle('active', btn.textContent === letter);
             });
 
-            // 更新进度条
-            const progress = ((currentIndex + 1) / letters.length) * 100;
-            document.getElementById('progress-fill').style.width = `${progress}%`;
-            document.getElementById('progress-text').textContent = `${letter} / Z`;
+            // 更新进度条（基于已访问的不同字母个数）
+            if (updateProgress) {
+                const visitedCount = visitedLetters.size;
+                const progress = (visitedCount / letters.length) * 100;
+                document.getElementById('progress-fill').style.width = `${progress}%`;
+                document.getElementById('progress-text').textContent = `已学习 ${visitedCount} / ${letters.length} 个字母`;
+            }
 
             // 更新单词卡片
             updateWords(data.words);
@@ -863,7 +870,9 @@
         function prevLetter() {
             if (currentIndex > 0) {
                 currentIndex--;
-                showLetter();
+                const letter = letters[currentIndex];
+                visitedLetters.add(letter);
+                showLetter(true);
             }
         }
 
@@ -871,7 +880,9 @@
         function nextLetter() {
             if (currentIndex < letters.length - 1) {
                 currentIndex++;
-                showLetter();
+                const letter = letters[currentIndex];
+                visitedLetters.add(letter);
+                showLetter(true);
             }
         }
 
